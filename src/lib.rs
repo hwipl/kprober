@@ -16,7 +16,10 @@ impl Symbols {
 
     pub fn print(&self) {
         for line in self.symbols.lines() {
-            println!("{}", line);
+            let l: Vec<&str> = line.split_whitespace().collect();
+            if l[1] == "t" || l[1] == "T" {
+                println!("{}", l[2]);
+            }
         }
     }
 }
