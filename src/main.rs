@@ -1,6 +1,6 @@
-use kprober::Symbols;
+use kprober::Ui;
 
 fn main() {
-    let symbols = Symbols::new();
-    symbols.print();
+    let mut ui = Ui::new();
+    ui.run();
 }

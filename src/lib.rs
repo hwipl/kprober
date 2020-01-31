@@ -1,5 +1,9 @@
 use std::fs;
 
+use cursive::traits::*;
+use cursive::views::{Dialog, SelectView};
+use cursive::Cursive;
+
 pub struct Symbols {
     symbols: Vec<String>,
 }
@@ -21,12 +25,63 @@ impl Symbols {
             }
         }
 
-        Symbols{ symbols }
+        Symbols { symbols }
     }
 
     pub fn print(&self) {
         for s in &self.symbols {
             println!("{}", s);
         }
+    }
+
+    fn get(&self) -> &Vec<String> {
+        &self.symbols
+    }
+}
+
+pub struct Ui {
+    siv: Cursive,
+    symbols: Symbols,
+}
+
+impl Ui {
+    pub fn new() -> Ui {
+        // cursive root
+        let siv = Cursive::default();
+
+        // load symbols
+        let symbols = Symbols::new();
+
+        Ui {
+            siv,
+            symbols: symbols,
+        }
+    }
+
+    pub fn run(&mut self) {
+        // select view
+        let mut select = SelectView::<String>::new();
+        select.add_all_str(self.symbols.get());
+        select.set_on_submit(Ui::on_submit);
+
+        // main layer
+        self.siv.add_layer(
+            Dialog::around(select.scrollable().full_screen())
+                .title("Select Symbol")
+                .button("Quit", |s| s.quit()),
+        );
+
+        // start main loop
+        self.siv.run()
+    }
+
+    fn on_submit(s: &mut Cursive, name: &str) {
+        s.add_layer(
+            Dialog::text(format!("Name: {}\n", name))
+                .title(format!("{}", name))
+                .button("Return", |s| {
+                    s.pop_layer();
+                }),
+        );
     }
 }

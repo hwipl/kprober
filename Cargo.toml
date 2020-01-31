@@ -8,3 +8,4 @@ edition = "2018"
 # https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+cursive = "*"
