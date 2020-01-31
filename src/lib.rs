@@ -45,17 +45,11 @@ pub struct Ui {
 }
 
 impl Ui {
-    pub fn new() -> Ui {
+    pub fn new(symbols: Symbols) -> Ui {
         // cursive root
         let siv = Cursive::default();
 
-        // load symbols
-        let symbols = Symbols::new();
-
-        Ui {
-            siv,
-            symbols: symbols,
-        }
+        Ui { siv, symbols }
     }
 
     pub fn run(&mut self) {
