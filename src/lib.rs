@@ -13,11 +13,14 @@ impl Symbols {
         fs::read_to_string(filename).unwrap()
     }
 
-    pub fn new() -> Symbols {
+    pub fn new(filter: &str) -> Symbols {
         let mut symbols = Vec::new();
         let contents = Symbols::from_file("/proc/kallsyms");
 
         for line in contents.lines() {
+            if !line.contains(filter) {
+                continue;
+            }
             let l: Vec<&str> = line.split_whitespace().collect();
 
             if l[1] == "t" || l[1] == "T" {
