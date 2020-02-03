@@ -13,8 +13,6 @@ fn main() {
         )
         .get_matches();
     let filter = matches.value_of("filter").unwrap_or("");
-    println!("The file passed is: {}", filter);
-
     let symbols = Symbols::new(filter);
     let mut ui = Ui::new(symbols);
     ui.run();
