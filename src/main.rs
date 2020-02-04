@@ -2,7 +2,18 @@ use clap::{App, Arg};
 use kprober::Symbols;
 use kprober::Ui;
 
+fn run_ui(filter: &str) -> Vec<String> {
+    let symbols = Symbols::new(filter);
+    let mut ui = Ui::new(symbols);
+    ui.run()
+}
+
+fn run_kprobes(selected: Vec<String>) {
+    kprober::run_commands(selected);
+}
+
 fn main() {
+    // parse command line arguments
     let matches = App::new("kprober")
         .arg(
             Arg::with_name("filter")
@@ -13,7 +24,10 @@ fn main() {
         )
         .get_matches();
     let filter = matches.value_of("filter").unwrap_or("");
-    let symbols = Symbols::new(filter);
-    let mut ui = Ui::new(symbols);
-    ui.run();
+
+    // run ui to get selected symbols
+    let selected = run_ui(filter);
+
+    // run kprobes on selected symbols
+    run_kprobes(selected);
 }

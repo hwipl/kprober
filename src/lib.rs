@@ -1,4 +1,5 @@
 use std::fs;
+use std::process::Command;
 
 use cursive::traits::*;
 use cursive::views::{Dialog, SelectView};
@@ -50,12 +51,16 @@ pub struct Ui {
 impl Ui {
     pub fn new(symbols: Symbols) -> Ui {
         // cursive root
-        let siv = Cursive::default();
+        let mut siv = Cursive::default();
+
+        // empty vector of selected items as user data
+        let selected: Vec<String> = Vec::new();
+        siv.set_user_data(selected);
 
         Ui { siv, symbols }
     }
 
-    pub fn run(&mut self) {
+    pub fn run(&mut self) -> Vec<String> {
         // select view
         let mut select = SelectView::<String>::new();
         select.add_all_str(self.symbols.get());
@@ -69,16 +74,38 @@ impl Ui {
         );
 
         // start main loop
-        self.siv.run()
+        self.siv.run();
+
+        // return selected items
+        let selected: &mut Vec<String> = self.siv.user_data().unwrap();
+        selected.to_vec()
     }
 
     fn on_submit(s: &mut Cursive, name: &str) {
+        let cmd = String::from(name);
         s.add_layer(
             Dialog::text(format!("Name: {}\n", name))
                 .title(format!("{}", name))
                 .button("Return", |s| {
                     s.pop_layer();
+                })
+                .button("Probe", move |s| {
+                    let selected: &mut Vec<String> = s.user_data().unwrap();
+                    selected.push(String::from(&cmd));
+                    s.quit();
+                    s.clear();
                 }),
         );
+    }
+}
+
+pub fn run_commands(names: Vec<String>) {
+    for name in names {
+        println!("Start running command {}", name);
+        let probe = format!("kprobe:{0} {{ printf(\"{0}\\n\"); }}", name);
+        let mut cmd = Command::new("bpftrace");
+        let mut proc = cmd.arg("-e").arg(probe).spawn().unwrap();
+        proc.wait().unwrap();
+        println!("Finished running command {}", name);
     }
 }
