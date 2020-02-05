@@ -9,7 +9,7 @@ fn run_ui(filter: &str) -> Vec<String> {
 }
 
 fn run_kprobes(selected: Vec<String>) {
-    kprober::run_commands(selected);
+    kprober::run_kprobes(selected);
 }
 
 fn main() {

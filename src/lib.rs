@@ -109,7 +109,7 @@ impl Ui {
     }
 }
 
-pub fn run_commands(names: Vec<String>) {
+pub fn run_kprobes(names: Vec<String>) {
     println!("Start running bpftrace for:");
     let mut probes = String::new();
     for name in names {
