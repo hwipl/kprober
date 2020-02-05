@@ -110,6 +110,12 @@ impl Ui {
 }
 
 pub fn run_kprobes(names: Vec<String>) {
+    // if no symbols are selected, stop here
+    if names.len() == 0 {
+        return;
+    }
+
+    // create krobe strings for bpftrace input
     println!("Start running bpftrace for:");
     let mut probes = String::new();
     for name in names {
@@ -119,10 +125,9 @@ pub fn run_kprobes(names: Vec<String>) {
     }
     println!("bpftrace output:\n");
 
-    if probes != "" {
-        let mut cmd = Command::new("bpftrace");
-        let mut proc = cmd.arg("-e").arg(probes).spawn().unwrap();
-        proc.wait().unwrap();
-    }
+    // run bpftrace
+    let mut cmd = Command::new("bpftrace");
+    let mut proc = cmd.arg("-e").arg(probes).spawn().unwrap();
+    proc.wait().unwrap();
     println!("Finished running bpftrace");
 }
