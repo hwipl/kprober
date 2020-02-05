@@ -110,12 +110,19 @@ impl Ui {
 }
 
 pub fn run_commands(names: Vec<String>) {
+    println!("Start running bpftrace for:");
+    let mut probes = String::new();
     for name in names {
-        println!("Start running command {}", name);
-        let probe = format!("kprobe:{0} {{ printf(\"{0}\\n\"); }}", name);
-        let mut cmd = Command::new("bpftrace");
-        let mut proc = cmd.arg("-e").arg(probe).spawn().unwrap();
-        proc.wait().unwrap();
-        println!("Finished running command {}", name);
+        println!("    {}", name);
+        let probe = format!("kprobe:{0} {{ printf(\"{0}\\n\"); }} ", name);
+        probes = format!("{}{}", probes, probe);
     }
+    println!("bpftrace output:\n");
+
+    if probes != "" {
+        let mut cmd = Command::new("bpftrace");
+        let mut proc = cmd.arg("-e").arg(probes).spawn().unwrap();
+        proc.wait().unwrap();
+    }
+    println!("Finished running bpftrace");
 }
