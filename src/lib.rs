@@ -63,14 +63,17 @@ impl Ui {
     pub fn run(&mut self) -> Vec<String> {
         // select view
         let mut select = SelectView::<String>::new();
-        select.add_all_str(self.symbols.get());
+        for i in self.symbols.get() {
+            select.add_item(format!("[ ] {}", i), i.to_string());
+        }
         select.set_on_submit(Ui::on_submit);
 
         // main layer
+        let select = select.with_name("select").scrollable().full_screen();
         self.siv.add_layer(
-            Dialog::around(select.scrollable().full_screen())
+            Dialog::around(select)
                 .title("Select Symbol")
-                .button("Quit", |s| s.quit()),
+                .button("Run/Quit", |s| s.quit()),
         );
 
         // start main loop
@@ -82,20 +85,27 @@ impl Ui {
     }
 
     fn on_submit(s: &mut Cursive, name: &str) {
-        let cmd = String::from(name);
-        s.add_layer(
-            Dialog::text(format!("Name: {}\n", name))
-                .title(format!("{}", name))
-                .button("Return", |s| {
-                    s.pop_layer();
-                })
-                .button("Probe", move |s| {
-                    let selected: &mut Vec<String> = s.user_data().unwrap();
-                    selected.push(String::from(&cmd));
-                    s.quit();
-                    s.clear();
-                }),
-        );
+        // mark item as (not) selected in internal state
+        let selected: &mut Vec<String> = s.user_data().unwrap();
+        let mut removed = false;
+        if selected.contains(&name.to_string()) {
+            // remove existing item from selected vector
+            selected.retain(|x| x != name);
+            removed = true;
+        } else {
+            // add item to selected vector
+            selected.push(String::from(name));
+        }
+
+        // mark item as (not) selected in view
+        let mut display_text = format!("[*] {}", name);
+        if removed {
+            display_text = format!("[ ] {}", name);
+        }
+        let mut select = s.find_name::<SelectView<String>>("select").unwrap();
+        let selected_id = select.selected_id().unwrap();
+        select.insert_item(selected_id, display_text, name.to_string());
+        select.remove_item(selected_id + 1);
     }
 }
 
