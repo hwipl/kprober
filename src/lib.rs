@@ -128,6 +128,14 @@ pub fn run_kprobes(names: Vec<String>) {
     // run bpftrace
     let mut cmd = Command::new("bpftrace");
     let mut proc = cmd.arg("-e").arg(probes).spawn().unwrap();
+
+    // set handler for ctrl-c
+    ctrlc::set_handler(move || {
+        println!("\nReceived CTRL-C. Stopping...");
+    })
+    .expect("Error setting Ctrl-C handler");
+
+    // wait until bpftrace terminates
     proc.wait().unwrap();
     println!("Finished running bpftrace");
 }
