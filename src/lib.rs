@@ -67,6 +67,7 @@ impl Ui {
             select.add_item(format!("[ ] {}", i), i.to_string());
         }
         select.set_on_submit(Ui::on_submit);
+        select.sort_by_label();
 
         // main layer
         let select = select.with_name("select").scrollable().full_screen();
