@@ -2,7 +2,7 @@ use std::fs;
 use std::process::Command;
 
 use cursive::traits::*;
-use cursive::views::{Dialog, SelectView};
+use cursive::views::{Button, Dialog, DummyView, EditView, LinearLayout, SelectView, TextView};
 use cursive::Cursive;
 
 pub struct Symbols {
@@ -69,13 +69,23 @@ impl Ui {
         select.set_on_submit(Ui::on_submit);
         select.sort_by_label();
 
-        // main layer
+        // bottom layout
+        let mut edit = EditView::new();
+        edit.set_on_submit(Ui::on_edit_submit);
+        let bottom_layout = LinearLayout::horizontal()
+            .child(TextView::new("Search:"))
+            .child(edit.fixed_width(60))
+            .child(DummyView.full_width())
+            .child(Button::new("Run/Quit", |s| s.quit()));
+
+        // main layout
         let select = select.with_name("select").scrollable().full_screen();
-        self.siv.add_layer(
-            Dialog::around(select)
-                .title("Select Symbol")
-                .button("Run/Quit", |s| s.quit()),
-        );
+        let layout = LinearLayout::vertical()
+            .child(select)
+            .child(DummyView)
+            .child(bottom_layout);
+        self.siv
+            .add_layer(Dialog::around(layout).title("Select Symbol"));
 
         // start main loop
         self.siv.run();
@@ -107,6 +117,21 @@ impl Ui {
         let selected_id = select.selected_id().unwrap();
         select.insert_item(selected_id, display_text, name.to_string());
         select.remove_item(selected_id + 1);
+    }
+
+    fn on_edit_submit(s: &mut Cursive, name: &str) {
+        let mut select = s.find_name::<SelectView<String>>("select").unwrap();
+        let mut item = None;
+        for (i, (_label, value)) in select.iter().enumerate() {
+            if value.contains(name) {
+                item = Some(i);
+                break;
+            }
+        }
+        if let Some(i) = item {
+            let cb = select.set_selection(i);
+            cb(s);
+        }
     }
 }
 
