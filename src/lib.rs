@@ -39,12 +39,24 @@ impl Symbols {
         }
     }
 
+    fn filter(&self, filter: &str) -> Vec<String> {
+        let mut symbols: Vec<String> = Vec::new();
+        for s in &self.symbols {
+            if !s.contains(filter) {
+                continue;
+            }
+            symbols.push(s.to_string());
+        }
+        return symbols;
+    }
+
     fn get(&self) -> &Vec<String> {
         &self.symbols
     }
 }
 
 struct UiState {
+    symbols: Symbols,
     selected: Vec<String>,
 }
 
@@ -78,6 +90,7 @@ pub fn run_ui(symbols: Symbols) -> Vec<String> {
 
     // create ui state as user data
     let state = UiState {
+        symbols,
         selected: Vec::new(),
     };
     siv.set_user_data(state);
@@ -118,16 +131,14 @@ fn ui_on_submit(s: &mut Cursive, name: &str) {
 
 fn ui_on_edit_submit(s: &mut Cursive, name: &str) {
     let mut select = s.find_name::<SelectView<String>>("select").unwrap();
-    let mut item = None;
-    for (i, (_label, value)) in select.iter().enumerate() {
-        if value.contains(name) {
-            item = Some(i);
-            break;
+    let state: &mut UiState = s.user_data().unwrap();
+    select.clear();
+    for i in state.symbols.filter(name) {
+        if state.selected.contains(&i.to_string()) {
+            select.add_item(format!("[*] {}", i), i.to_string());
+        } else {
+            select.add_item(format!("[ ] {}", i), i.to_string());
         }
-    }
-    if let Some(i) = item {
-        let cb = select.set_selection(i);
-        cb(s);
     }
 }
 
