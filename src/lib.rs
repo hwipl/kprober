@@ -75,7 +75,7 @@ pub fn run_ui(symbols: Symbols) -> Vec<String> {
     let mut edit = EditView::new();
     edit.set_on_submit(ui_on_edit_submit);
     let bottom_layout = LinearLayout::horizontal()
-        .child(TextView::new("Search:"))
+        .child(TextView::new("Filter:"))
         .child(edit.fixed_width(60))
         .child(DummyView.full_width())
         .child(Button::new("Run/Quit", |s| s.quit()));
