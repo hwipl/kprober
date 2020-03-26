@@ -1,11 +1,9 @@
 use clap::{App, Arg};
 use kprober::Symbols;
-use kprober::Ui;
 
 fn run_ui(filter: &str) -> Vec<String> {
     let symbols = Symbols::new(filter);
-    let mut ui = Ui::new(symbols);
-    ui.run()
+    kprober::run_ui(symbols)
 }
 
 fn run_kprobes(selected: Vec<String>) {

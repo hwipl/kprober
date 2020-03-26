@@ -43,95 +43,91 @@ impl Symbols {
     }
 }
 
-pub struct Ui {
-    siv: Cursive,
-    symbols: Symbols,
+struct UiState {
+    selected: Vec<String>,
 }
 
-impl Ui {
-    pub fn new(symbols: Symbols) -> Ui {
-        // cursive root
-        let mut siv = Cursive::default();
+pub fn run_ui(symbols: Symbols) -> Vec<String> {
+    // cursive root
+    let mut siv = Cursive::default();
 
-        // empty vector of selected items as user data
-        let selected: Vec<String> = Vec::new();
-        siv.set_user_data(selected);
+    // select view
+    let mut select = SelectView::<String>::new();
+    for i in symbols.get() {
+        select.add_item(format!("[ ] {}", i), i.to_string());
+    }
+    select.set_on_submit(ui_on_submit);
+    select.sort_by_label();
 
-        Ui { siv, symbols }
+    // bottom layout
+    let mut edit = EditView::new();
+    edit.set_on_submit(ui_on_edit_submit);
+    let bottom_layout = LinearLayout::horizontal()
+        .child(TextView::new("Search:"))
+        .child(edit.fixed_width(60))
+        .child(DummyView.full_width())
+        .child(Button::new("Run/Quit", |s| s.quit()));
+
+    // main layout
+    let select = select.with_name("select").scrollable().full_screen();
+    let layout = LinearLayout::vertical()
+        .child(select)
+        .child(DummyView)
+        .child(bottom_layout);
+    siv.add_layer(Dialog::around(layout).title("Select Symbol"));
+
+    // create ui state as user data
+    let state = UiState {
+        selected: Vec::new(),
+    };
+    siv.set_user_data(state);
+
+    // start main loop
+    siv.run();
+
+    // return selected items
+    let state: &mut UiState = siv.user_data().unwrap();
+    let selected: &mut Vec<String> = &mut state.selected;
+    selected.to_vec()
+}
+
+fn ui_on_submit(s: &mut Cursive, name: &str) {
+    // mark item as (not) selected in internal state
+    let state: &mut UiState = s.user_data().unwrap();
+    let selected: &mut Vec<String> = &mut state.selected;
+    let mut removed = false;
+    if selected.contains(&name.to_string()) {
+        // remove existing item from selected vector
+        selected.retain(|x| x != name);
+        removed = true;
+    } else {
+        // add item to selected vector
+        selected.push(String::from(name));
     }
 
-    pub fn run(&mut self) -> Vec<String> {
-        // select view
-        let mut select = SelectView::<String>::new();
-        for i in self.symbols.get() {
-            select.add_item(format!("[ ] {}", i), i.to_string());
-        }
-        select.set_on_submit(Ui::on_submit);
-        select.sort_by_label();
-
-        // bottom layout
-        let mut edit = EditView::new();
-        edit.set_on_submit(Ui::on_edit_submit);
-        let bottom_layout = LinearLayout::horizontal()
-            .child(TextView::new("Search:"))
-            .child(edit.fixed_width(60))
-            .child(DummyView.full_width())
-            .child(Button::new("Run/Quit", |s| s.quit()));
-
-        // main layout
-        let select = select.with_name("select").scrollable().full_screen();
-        let layout = LinearLayout::vertical()
-            .child(select)
-            .child(DummyView)
-            .child(bottom_layout);
-        self.siv
-            .add_layer(Dialog::around(layout).title("Select Symbol"));
-
-        // start main loop
-        self.siv.run();
-
-        // return selected items
-        let selected: &mut Vec<String> = self.siv.user_data().unwrap();
-        selected.to_vec()
+    // mark item as (not) selected in view
+    let mut display_text = format!("[*] {}", name);
+    if removed {
+        display_text = format!("[ ] {}", name);
     }
+    let mut select = s.find_name::<SelectView<String>>("select").unwrap();
+    let selected_id = select.selected_id().unwrap();
+    select.insert_item(selected_id, display_text, name.to_string());
+    select.remove_item(selected_id + 1);
+}
 
-    fn on_submit(s: &mut Cursive, name: &str) {
-        // mark item as (not) selected in internal state
-        let selected: &mut Vec<String> = s.user_data().unwrap();
-        let mut removed = false;
-        if selected.contains(&name.to_string()) {
-            // remove existing item from selected vector
-            selected.retain(|x| x != name);
-            removed = true;
-        } else {
-            // add item to selected vector
-            selected.push(String::from(name));
+fn ui_on_edit_submit(s: &mut Cursive, name: &str) {
+    let mut select = s.find_name::<SelectView<String>>("select").unwrap();
+    let mut item = None;
+    for (i, (_label, value)) in select.iter().enumerate() {
+        if value.contains(name) {
+            item = Some(i);
+            break;
         }
-
-        // mark item as (not) selected in view
-        let mut display_text = format!("[*] {}", name);
-        if removed {
-            display_text = format!("[ ] {}", name);
-        }
-        let mut select = s.find_name::<SelectView<String>>("select").unwrap();
-        let selected_id = select.selected_id().unwrap();
-        select.insert_item(selected_id, display_text, name.to_string());
-        select.remove_item(selected_id + 1);
     }
-
-    fn on_edit_submit(s: &mut Cursive, name: &str) {
-        let mut select = s.find_name::<SelectView<String>>("select").unwrap();
-        let mut item = None;
-        for (i, (_label, value)) in select.iter().enumerate() {
-            if value.contains(name) {
-                item = Some(i);
-                break;
-            }
-        }
-        if let Some(i) = item {
-            let cb = select.set_selection(i);
-            cb(s);
-        }
+    if let Some(i) = item {
+        let cb = select.set_selection(i);
+        cb(s);
     }
 }
 
