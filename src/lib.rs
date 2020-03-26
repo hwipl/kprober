@@ -29,6 +29,7 @@ impl Symbols {
             }
         }
 
+        symbols.sort();
         Symbols { symbols }
     }
 
@@ -57,7 +58,6 @@ pub fn run_ui(symbols: Symbols) -> Vec<String> {
         select.add_item(format!("[ ] {}", i), i.to_string());
     }
     select.set_on_submit(ui_on_submit);
-    select.sort_by_label();
 
     // bottom layout
     let mut edit = EditView::new();
