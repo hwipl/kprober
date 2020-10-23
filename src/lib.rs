@@ -14,6 +14,17 @@ impl Symbols {
         fs::read_to_string(filename).unwrap()
     }
 
+    fn from_bpftrace() -> String {
+        // run bpftrace and capture output
+        let output = Command::new("bpftrace")
+            .arg("-l")
+            .arg("kprobe:*")
+            .output()
+            .expect("failed to execute \"bpftrace -l\"");
+
+        return String::from_utf8(output.stdout).unwrap();
+    }
+
     fn new_from_file(filter: &str) -> Vec<String> {
         let mut symbols = Vec::new();
         let contents = Symbols::from_file("/proc/kallsyms");
