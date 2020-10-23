@@ -42,6 +42,20 @@ impl Symbols {
         return symbols;
     }
 
+    fn new_from_bpftrace(filter: &str) -> Vec<String> {
+        let mut symbols = Vec::new();
+        let contents = Symbols::from_bpftrace();
+
+        for line in contents.lines() {
+            if !line.contains(filter) {
+                continue;
+            }
+            let line = String::from(line.strip_prefix("kprobe:").unwrap());
+            symbols.push(line);
+        }
+        return symbols;
+    }
+
     pub fn new(filter: &str) -> Symbols {
         let mut symbols: Vec<String>;
 
