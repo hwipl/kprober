@@ -56,10 +56,14 @@ impl Symbols {
         return symbols;
     }
 
-    pub fn new(filter: &str) -> Symbols {
+    pub fn new(source: &str, filter: &str) -> Symbols {
         let mut symbols: Vec<String>;
 
-        symbols = Symbols::new_from_file(filter);
+        if source == "bpftrace" {
+            symbols = Symbols::new_from_bpftrace(filter);
+        } else {
+            symbols = Symbols::new_from_file(filter);
+        };
 
         symbols.sort();
         Symbols { symbols }

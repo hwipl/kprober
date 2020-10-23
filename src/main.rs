@@ -1,8 +1,8 @@
 use clap::{App, Arg};
 use kprober::Symbols;
 
-fn run_ui(filter: &str) -> Vec<String> {
-    let symbols = Symbols::new(filter);
+fn run_ui(source: &str, filter: &str) -> Vec<String> {
+    let symbols = Symbols::new(source, filter);
     kprober::run_ui(symbols)
 }
 
@@ -20,11 +20,20 @@ fn main() {
                 .help("Filter symbols")
                 .takes_value(true),
         )
+        .arg(
+            Arg::with_name("symbol-source")
+                .short("s")
+                .help("Symbol source")
+                .takes_value(true)
+                .possible_value("kallsyms")
+                .possible_value("bpftrace"),
+        )
         .get_matches();
     let filter = matches.value_of("filter").unwrap_or("");
+    let source = matches.value_of("symbol-source").unwrap_or("kallsyms");
 
     // run ui to get selected symbols
-    let selected = run_ui(filter);
+    let selected = run_ui(source, filter);
 
     // run kprobes on selected symbols
     run_kprobes(selected);
