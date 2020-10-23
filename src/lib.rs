@@ -14,7 +14,7 @@ impl Symbols {
         fs::read_to_string(filename).unwrap()
     }
 
-    pub fn new(filter: &str) -> Symbols {
+    fn new_from_file(filter: &str) -> Vec<String> {
         let mut symbols = Vec::new();
         let contents = Symbols::from_file("/proc/kallsyms");
 
@@ -28,6 +28,13 @@ impl Symbols {
                 symbols.push(String::from(l[2]));
             }
         }
+        return symbols;
+    }
+
+    pub fn new(filter: &str) -> Symbols {
+        let mut symbols: Vec<String>;
+
+        symbols = Symbols::new_from_file(filter);
 
         symbols.sort();
         Symbols { symbols }
