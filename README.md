@@ -16,15 +16,15 @@ kprober requires:
 You can run kprober with the `kprober` command:
 
 ```
+kprober
+
 USAGE:
     kprober [OPTIONS]
 
-FLAGS:
-    -h, --help       Prints help information
-    -V, --version    Prints version information
-
 OPTIONS:
-    -f, --filter <filter>    Filter symbols
+    -f, --filter <filter>     Filter symbols
+    -h, --help                Print help information
+    -s <symbol-source>        Symbol source [possible values: kallsyms, bpftrace]
 ```
 
 Basic navigation in the UI: You can navigate the symbols list with the up and
