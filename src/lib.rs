@@ -98,7 +98,7 @@ struct UiState {
 
 pub fn run_ui(symbols: Symbols) -> Vec<String> {
     // cursive root
-    let mut siv = Cursive::default();
+    let mut siv = cursive::default();
 
     // select view
     let mut select = SelectView::<String>::new();

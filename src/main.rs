@@ -1,4 +1,4 @@
-use clap::{App, Arg};
+use clap::{Arg, Command};
 use kprober::Symbols;
 
 fn run_ui(source: &str, filter: &str) -> Vec<String> {
@@ -12,17 +12,17 @@ fn run_kprobes(selected: Vec<String>) {
 
 fn main() {
     // parse command line arguments
-    let matches = App::new("kprober")
+    let matches = Command::new("kprober")
         .arg(
-            Arg::with_name("filter")
-                .short("f")
+            Arg::new("filter")
+                .short('f')
                 .long("filter")
                 .help("Filter symbols")
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("symbol-source")
-                .short("s")
+            Arg::new("symbol-source")
+                .short('s')
                 .help("Symbol source")
                 .takes_value(true)
                 .possible_value("kallsyms")
