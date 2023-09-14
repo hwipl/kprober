@@ -18,19 +18,18 @@ fn main() {
                 .short('f')
                 .long("filter")
                 .help("Filter symbols")
-                .takes_value(true),
+                .default_value(""),
         )
         .arg(
             Arg::new("symbol-source")
                 .short('s')
                 .help("Symbol source")
-                .takes_value(true)
-                .possible_value("kallsyms")
-                .possible_value("bpftrace"),
+                .value_parser(["kallsyms", "bpftrace"])
+                .default_value("kallsyms"),
         )
         .get_matches();
-    let filter = matches.value_of("filter").unwrap_or("");
-    let source = matches.value_of("symbol-source").unwrap_or("kallsyms");
+    let filter = matches.get_one::<String>("filter").unwrap();
+    let source = matches.get_one::<String>("symbol-source").unwrap();
 
     // run ui to get selected symbols
     let selected = run_ui(source, filter);
