@@ -8,6 +8,6 @@ edition = "2021"
 # https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cursive = "0.20.0"
-clap = "4.4.3"
-ctrlc = "3.4.1"
+cursive = "0.21.1"
+clap = "4.5.23"
+ctrlc = "3.4.5"
