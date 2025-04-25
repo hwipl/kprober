@@ -9,5 +9,5 @@ edition = "2021"
 
 [dependencies]
 cursive = "0.21.1"
-clap = "4.5.23"
-ctrlc = "3.4.5"
+clap = "4.5.37"
+ctrlc = "3.4.6"
